@@ -20,22 +20,15 @@ X_train = sequence.pad_sequences(X_train, maxlen=max_review_length)
 embedding_vecor_length = 300
 model = Sequential()
 model.add(Embedding(top_words, embedding_vecor_length, input_length=max_review_length))
+model.add(LSTM(100))
+model.add(Dense(2, activation='softmax'))
 
-# Convolutional model (3x conv, flatten, 2x dense)
-model.add(Convolution1D(64, 3, padding='same'))
-model.add(Convolution1D(32, 3, padding='same'))
-model.add(Convolution1D(16, 3, padding='same'))
-model.add(Flatten())
-model.add(Dropout(0.6))
-model.add(Dense(180,activation='sigmoid', kernel_regularizer=regularizers.l2(0.02)))
-model.add(Dropout(0.6))
-model.add(Dense(1,activation='sigmoid'))
+model.compile(loss='binary_crossentropy', 
+             optimizer='adam', 
+             metrics=['accuracy'])
 
-# Log to tensorboard
-tensorBoardCallback = TensorBoard(log_dir='./logs', write_graph=True)
-model.compile(Adam(lr=0.0001), loss='binary_crossentropy', metrics=['accuracy'])
-
-model.fit(X_train, y_train, epochs=12, validation_split=0.2,callbacks=[tensorBoardCallback], batch_size=32)
+# model.fit(X_train, y_train, epochs=12, validation_split=0.2,callbacks=[tensorBoardCallback], batch_size=32)
+model.fit(X_train, y_train, validation_split=0.2, epochs=3)
 
 # model.save("trained_demo.h5")
 model.load_weights('trained_demo.h5')
